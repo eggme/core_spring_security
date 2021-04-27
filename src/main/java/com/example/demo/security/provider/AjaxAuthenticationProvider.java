@@ -1,18 +1,16 @@
 package com.example.demo.security.provider;
 
-import com.example.demo.security.common.FormWebAuthenticationDetails;
 import com.example.demo.security.service.AccountContext;
+import com.example.demo.security.token.AjaxAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class CustomAuthenticationProvider implements AuthenticationProvider {
+public class AjaxAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -33,21 +31,16 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException("BadCredentialsException");
         }
 
-        String secretKey = ((FormWebAuthenticationDetails) authentication.getDetails()).getSecretKey();
-        if(secretKey == null || !"secret".equals(secretKey)){
-            throw new InsufficientAuthenticationException("InsufficientAuthenticationException");
-        }
+        AjaxAuthenticationToken ajaxAuthenticationToken =
+                new AjaxAuthenticationToken(accountContext.getAccount(), null,
+                        accountContext.getAuthorities());
 
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(accountContext.getAccount(), null,
-                                                        accountContext.getAuthorities());
-
-        return authenticationToken;
+        return ajaxAuthenticationToken;
     }
 
     // 현재 파라미터로 전달되는 Authentication과 AuthenticationProvider 클래스가 사용하고자 하는 토큰과 일치할 떄 인증처리를 할 수 있게 처리
     @Override
     public boolean supports(Class<?> authenticationToken) {
-        return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authenticationToken);
+        return authenticationToken.equals(AjaxAuthenticationToken.class);
     }
 }
