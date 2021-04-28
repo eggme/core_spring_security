@@ -4,6 +4,7 @@ import com.example.demo.domain.dto.ResourcesDTO;
 import com.example.demo.domain.entity.Resources;
 import com.example.demo.domain.entity.Role;
 import com.example.demo.repository.RoleRepository;
+import com.example.demo.security.metadatasource.UrlFilterInvocationSecurityMetadataSource;
 import com.example.demo.service.ResourcesService;
 import com.example.demo.service.RoleService;
 import org.modelmapper.ModelMapper;
@@ -30,6 +31,9 @@ public class ResourcesController {
     @Autowired
     private RoleService roleService;
 
+    @Autowired
+    private UrlFilterInvocationSecurityMetadataSource filterInvocationSecurityMetadataSource;
+
     @GetMapping(value="/admin/resources")
     public String getResources(Model model) throws Exception {
 
@@ -50,6 +54,7 @@ public class ResourcesController {
         resources.setRoleSet(roles);
 
         resourcesService.createResources(resources);
+        filterInvocationSecurityMetadataSource.reload();
 
         return "redirect:/admin/resources";
     }
@@ -88,6 +93,7 @@ public class ResourcesController {
 
         Resources resources = resourcesService.getResources(Long.valueOf(id));
         resourcesService.deleteResources(Long.valueOf(id));
+        filterInvocationSecurityMetadataSource.reload();
 
         return "redirect:/admin/resources";
     }
